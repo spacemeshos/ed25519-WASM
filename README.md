@@ -39,3 +39,17 @@ __verifyTransaction is JS exposure of Verify2 verifies a signature created with 
 func Verify2(publicKey PublicKey, message, sig []byte) bool
 __verifyTransaction(publicKey Uint8Array(32), message Uint8Array, signature Uint8Array(64), callbackToStoreValue Function) boolean
 ````
+
+# Compilation
+
+First time usage - copy the go-js environment file to your working directory
+```
+cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" .
+```
+
+Then compile go to WASM
+```
+GOOS=js GOARCH=wasm go build -o ed25519.wasm
+```
+
+## Go version used for compilation 1.12.4
