@@ -2,8 +2,9 @@ package main
 
 import (
 	"bytes"
-	"github.com/spacemeshos/ed25519"
 	"syscall/js"
+
+	"github.com/spacemeshos/ed25519"
 )
 
 var c chan bool
@@ -21,6 +22,12 @@ func TypedArrayToByteSlice(arg js.Value) []byte {
 	return bytesToReturn
 }
 
+func SliceToJSArray(slice []byte) js.Value {
+	jsArry := js.Global().Get("Uint8Array").New(len(slice))
+	js.CopyBytesToJS(jsArry, slice)
+	return jsArry
+}
+
 var GenerateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 	seed := TypedArrayToByteSlice(args[0])
 	seedBuffer := bytes.NewReader(seed)
@@ -30,29 +37,25 @@ var GenerateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) interfa
 		callback.Invoke(js.Null(), js.Null())
 		return nil
 	}
-	callback.Invoke(js.TypedArrayOf([]byte(publicKey)), js.TypedArrayOf([]byte(privateKey)))
-	return nil
+	_ = publicKey
+	return SliceToJSArray([]byte(privateKey))
 })
 
 var DerivePrivateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 	seed := TypedArrayToByteSlice(args[0])
 	index := uint64(args[1].Int())
 	salt := TypedArrayToByteSlice(args[2])
-	callback := args[3]
 	var privateKey = ed25519.NewDerivedKeyFromSeed(seed, index, salt)
 	publicKey := make([]byte, ed25519.PublicKeySize)
 	copy(publicKey, privateKey[32:])
-	callback.Invoke(js.TypedArrayOf([]byte(publicKey)), js.TypedArrayOf([]byte(privateKey)))
-	return nil
+	return SliceToJSArray([]byte(privateKey))
 })
 
 var Sign2Callback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 	var sk ed25519.PrivateKey = TypedArrayToByteSlice(args[0])
 	var message = TypedArrayToByteSlice(args[1])
-	callback := args[len(args)-1:][0]
 	signature := ed25519.Sign2(sk, message)
-	callback.Invoke(js.TypedArrayOf(signature))
-	return nil
+	return SliceToJSArray([]byte(signature))
 })
 
 var Verify2Callback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -60,9 +63,7 @@ var Verify2Callback = js.FuncOf(func(this js.Value, args []js.Value) interface{}
 	var message = TypedArrayToByteSlice(args[1])
 	var signature = TypedArrayToByteSlice(args[2])
 	isValid := ed25519.Verify2(pk, message, signature)
-	callback := args[len(args)-1:][0]
-	callback.Invoke(isValid)
-	return nil
+	return isValid
 })
 
 var ShutdownCallback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
