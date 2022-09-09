@@ -28,17 +28,26 @@ func SliceToJSArray(slice []byte) js.Value {
 	return jsArry
 }
 
-var GenerateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+var GeneratePrivateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 	seed := TypedArrayToByteSlice(args[0])
 	seedBuffer := bytes.NewReader(seed)
 	var publicKey, privateKey, err = ed25519.GenerateKey(seedBuffer)
-	callback := args[1]
 	if err != nil {
-		callback.Invoke(js.Null(), js.Null())
 		return nil
 	}
 	_ = publicKey
 	return SliceToJSArray([]byte(privateKey))
+})
+
+var GeneratePublicKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	seed := TypedArrayToByteSlice(args[0])
+	seedBuffer := bytes.NewReader(seed)
+	var publicKey, privateKey, err = ed25519.GenerateKey(seedBuffer)
+	if err != nil {
+		return nil
+	}
+	_ = privateKey
+	return SliceToJSArray([]byte(publicKey))
 })
 
 var DerivePrivateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -49,6 +58,16 @@ var DerivePrivateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) in
 	publicKey := make([]byte, ed25519.PublicKeySize)
 	copy(publicKey, privateKey[32:])
 	return SliceToJSArray([]byte(privateKey))
+})
+
+var DerivePublicKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+	seed := TypedArrayToByteSlice(args[0])
+	index := uint64(args[1].Int())
+	salt := TypedArrayToByteSlice(args[2])
+	var privateKey = ed25519.NewDerivedKeyFromSeed(seed, index, salt)
+	publicKey := make([]byte, ed25519.PublicKeySize)
+	copy(publicKey, privateKey[32:])
+	return SliceToJSArray([]byte(publicKey))
 })
 
 var Sign2Callback = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -72,19 +91,23 @@ var ShutdownCallback = js.FuncOf(func(this js.Value, args []js.Value) interface{
 })
 
 func RegisterCallbacks() {
-	js.Global().Set("__generateKeyPair", GenerateKeyCallback)
-	js.Global().Set("__deriveNewKeyPair", DerivePrivateKeyCallback)
+	js.Global().Set("__generatePrivateKey", GeneratePrivateKeyCallback)
+	js.Global().Set("__generatePublicKey", GeneratePublicKeyCallback)
+	js.Global().Set("__derivePrivateKey", DerivePrivateKeyCallback)
+	js.Global().Set("__derivePublicKey", DerivePublicKeyCallback)
 	js.Global().Set("__signTransaction", Sign2Callback)
 	js.Global().Set("__verifyTransaction", Verify2Callback)
 	js.Global().Set("__stopAndCleanUp", ShutdownCallback)
 }
 
 func CleanUp() {
-	js.Global().Set("__generateKeyPair", js.Undefined())
-	js.Global().Set("__deriveNewKeyPair", js.Undefined())
+	js.Global().Set("__generatePrivateKey", js.Undefined())
+	js.Global().Set("__generatePublicKey", js.Undefined())
+	js.Global().Set("__derivePrivateKey", js.Undefined())
+	js.Global().Set("__derivePublicKey", js.Undefined())
 	js.Global().Set("__signTransaction", js.Undefined())
 	js.Global().Set("__verifyTransaction", js.Undefined())
-	js.Global().Set("__stopAndCleanUp", js.Undefined())
+	js.Global().Set("__stopAndCleanUp",  js.Undefined())
 }
 
 func main() {
@@ -93,8 +116,11 @@ func main() {
 	<-c
 
 	CleanUp()
-	GenerateKeyCallback.Release()
+
+	GeneratePrivateKeyCallback.Release()
+	GeneratePublicKeyCallback.Release()
 	DerivePrivateKeyCallback.Release()
+	DerivePublicKeyCallback.Release()
 	Sign2Callback.Release()
 	Verify2Callback.Release()
 	ShutdownCallback.Release()
