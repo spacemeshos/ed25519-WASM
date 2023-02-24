@@ -1,0 +1,37 @@
+name: CI
+
+env:
+  go-version: "1.19"
+  node-version: "16"
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the develop branch
+on:
+  pull_request:
+  push:
+    branches: [develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GOOS: js
+      GOARCH: wasm
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: set up go
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ env.go-version }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.node-version }}
+      - name: Setup PATH for wasm
+        run: echo "${{env.GOROOT}}/misc/wasm" >> $GITHUB_PATH
+
+      - name: build
+        run: go build -v ./...
+      - name: go test
+        run: go test -v ./...
