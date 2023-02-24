@@ -14,9 +14,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      GOOS: js
-      GOARCH: wasm
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -24,14 +21,28 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ${{ env.go-version }}
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.node-version }}
+
+      - name: Install chrome
+        uses: browser-actions/setup-chrome@latest
+      - name: Install wasmbrowsertest
+        run: go install github.com/agnivade/wasmbrowsertest@v0.7.0
+      - name: Setup wasmexec
+        run: mv $(go env GOPATH)/bin/wasmbrowsertest $(go env GOPATH)/bin/go_js_wasm_exec
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: ${{ env.node-version }}
       - name: Setup PATH for wasm
         run: echo "${{env.GOROOT}}/misc/wasm" >> $GITHUB_PATH
 
       - name: build
+        env:
+          GOOS: js
+          GOARCH: wasm
         run: go build -v ./...
       - name: go test
+        env:
+          GOOS: js
+          GOARCH: wasm
         run: go test -v ./...
