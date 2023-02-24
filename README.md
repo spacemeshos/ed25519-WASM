@@ -45,18 +45,13 @@ func Verify2(publicKey PublicKey, message, sig []byte) bool
 __verifyTransaction(publicKey Uint8Array(32), message Uint8Array, signature Uint8Array(64), callbackToStoreValue Function) boolean
 ```
 
-## Compilation
+## Building from sources
 
-First time usage - copy the go-js environment file to your working directory
+- Go version used for compilation 1.19.6
+- NodeJS 16.15.0+
+- yarn
 
+Run
 ```bash
-cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" .
+make
 ```
-
-Then compile go to WASM
-
-```bash
-GOOS=js GOARCH=wasm go build -o ed25519.wasm
-```
-
-## Go version used for compilation 1.19.6
