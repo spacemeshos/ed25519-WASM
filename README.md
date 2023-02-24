@@ -1,8 +1,7 @@
 # ed25519-WASM
 
-A drop-in replacement for `golang/crypto/ed25519` ([godoc](https://godoc.org/golang.org/x/crypto/ed25519),
-[github](https://github.com/golang/crypto/tree/master/ed25519))
- with additional functionality compiled to WASM
+A drop-in replacement for `crypto/ed25519` ([pkg.go.dev](https://pkg.go.dev/crypto/ed25519), [github](https://github.com/golang/crypto/tree/master/ed25519))
+with additional functionality compiled to WASM.
 
 ## Motivation
 
