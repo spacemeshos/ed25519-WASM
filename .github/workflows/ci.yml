@@ -23,7 +23,7 @@ jobs:
           go-version: ${{ env.go-version }}
 
       - name: Install chrome
-        uses: browser-actions/setup-chrome@latest
+        uses: browser-actions/setup-chrome@v1
       - name: Install wasmbrowsertest
         run: go install github.com/agnivade/wasmbrowsertest@v0.7.0
       - name: Setup wasmexec
