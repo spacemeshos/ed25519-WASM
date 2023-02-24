@@ -29,10 +29,6 @@ jobs:
       - name: Setup wasmexec
         run: mv $(go env GOPATH)/bin/wasmbrowsertest $(go env GOPATH)/bin/go_js_wasm_exec
 
-      # - name: Set up Node.js
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: ${{ env.node-version }}
       - name: Setup PATH for wasm
         run: echo "${{env.GOROOT}}/misc/wasm" >> $GITHUB_PATH
 
@@ -40,9 +36,19 @@ jobs:
         env:
           GOOS: js
           GOARCH: wasm
-        run: go build -v ./...
+        run: go build -v -o ./ed25519.wasm ./wasm/...
       - name: go test
         env:
           GOOS: js
           GOARCH: wasm
-        run: go test -v ./...
+        run: go test -v ./wasm/...
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.node-version }}
+          cache: 'yarn'
+
+      - name: build and test js library
+        run: make ci
+
