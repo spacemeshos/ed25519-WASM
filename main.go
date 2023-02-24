@@ -13,6 +13,10 @@ func init() {
 	c = make(chan bool)
 }
 
+// GenerateKeyCallback is a callback function that generates a new key pair from a seed.
+// Parameters:
+//   1. seed - a Uint8Array of 32 bytes
+//   2. callback - a function that will be called with the generated public and private keys
 var GenerateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) any {
 	callback := args[1]
 
@@ -45,6 +49,12 @@ var GenerateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) any {
 	return nil
 })
 
+// DerivePrivateKeyCallback is a callback function that derives a new key pair from a seed.
+// Parameters:
+//   1. seed - a Uint8Array of 32 bytes
+//   2. index - a number
+//   3. salt - a Uint8Array of 32 bytes
+//   4. callback - a function that will be called with the generated public and private keys
 var DerivePrivateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) any {
 	callback := args[3]
 
@@ -80,8 +90,13 @@ var DerivePrivateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) an
 	return nil
 })
 
+// Sign2Callback is a callback function that signs a message with a private key using a modified version of ed25519 signature scheme to allow key extraction.
+// Parameters:
+//   1. privateKey - a Uint8Array of 64 bytes
+//   2. message - a Uint8Array
+//   3. callback - a function that will be called with the generated signature
 var Sign2Callback = js.FuncOf(func(this js.Value, args []js.Value) any {
-	callback := args[len(args)-1]
+	callback := args[2]
 	
 	sk := make([]byte, ed25519.PrivateKeySize)
 	n := js.CopyBytesToGo(sk, args[0])
@@ -107,8 +122,14 @@ var Sign2Callback = js.FuncOf(func(this js.Value, args []js.Value) any {
 	return nil
 })
 
+// Verify2Callback is a callback function that verifies a signature with a public key using a modified version of ed25519 signature scheme to allow key extraction.
+// Parameters:
+//   1. publicKey - a Uint8Array of 32 bytes
+//   2. message - a Uint8Array
+//   3. signature - a Uint8Array of 64 bytes
+//   4. callback - a function that will be called with the generated signature
 var Verify2Callback = js.FuncOf(func(this js.Value, args []js.Value) any {
-	callback := args[len(args)-1]
+	callback := args[3]
 
 	pk := make([]byte, ed25519.PublicKeySize)
 	n := js.CopyBytesToGo(pk, args[0])
