@@ -23,12 +23,12 @@ func Test_Generate(t *testing.T) {
 		pubKey := make([]byte, ed25519.PublicKeySize)
 		n := js.CopyBytesToGo(pubKey, args[0])
 		require.Equal(t, ed25519.PublicKeySize, n)
-		require.Equal(t, key.Public(), pubKey)
+		require.EqualValues(t, key.Public(), pubKey)
 
 		privKey := make([]byte, ed25519.PrivateKeySize)
 		n = js.CopyBytesToGo(privKey, args[1])
 		require.Equal(t, ed25519.PrivateKeySize, n)
-		require.Equal(t, key, privKey)
+		require.EqualValues(t, key, privKey)
 
 		return nil
 	}))
