@@ -5,3 +5,5 @@ yarn-error.log
 build/
 lib/
 .DS_Store
+ed25519.wasm
+wasm_exec.js
