@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/spacemeshos/ed25519 v0.1.2-0.20230224092249-82d338fbae79
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 )
 
 require (
