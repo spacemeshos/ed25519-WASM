@@ -27,5 +27,5 @@ test-js:
 
 install:
 	go install github.com/agnivade/wasmbrowsertest@v0.7.0
-	mv $(go env GOPATH)/bin/wasmbrowsertest $(go env GOPATH)/bin/go_js_wasm_exec
+	mv $(shell go env GOPATH)/bin/wasmbrowsertest $(shell go env GOPATH)/bin/go_js_wasm_exec
 .PHONY: install
