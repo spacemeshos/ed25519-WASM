@@ -25,6 +25,17 @@ test-js:
 	yarn test
 .PHONY: test-js
 
+bench-all: bench-go bench-js
+.PHONY: bench-all
+
+bench-go:
+	GOOS=js GOARCH=wasm go test -bench=. -benchmem ./wasm/...
+.PHONY: bench-go
+
+bench-js:
+	npx jest --projects jest-bench.config.js
+.PHONY: bench-js
+
 install:
 	go install github.com/agnivade/wasmbrowsertest@v0.7.0
 	mv $(shell go env GOPATH)/bin/wasmbrowsertest $(shell go env GOPATH)/bin/go_js_wasm_exec

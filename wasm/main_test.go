@@ -106,3 +106,51 @@ func Test_Verify2(t *testing.T) {
 		return nil
 	}))
 }
+
+func Benchmark_Sign2(b *testing.B) {
+	pub, priv, err := ed25519.GenerateKey(nil)
+	require.NoError(b, err)
+	privBytes := js.Global().Get("Uint8Array").New(ed25519.PrivateKeySize)
+	n := js.CopyBytesToJS(privBytes, priv)
+	require.Equal(b, ed25519.PrivateKeySize, n)
+
+	message := []byte("hello world")
+	msgBytes := js.Global().Get("Uint8Array").New(len(message))
+	n = js.CopyBytesToJS(msgBytes, message)
+	require.Equal(b, len(message), n)
+
+	sig := make([]byte, ed25519.SignatureSize)
+	for i := 0; i < b.N; i++ {
+		Sign2Callback.Invoke(privBytes, msgBytes, js.FuncOf(func(this js.Value, args []js.Value) any {
+			n := js.CopyBytesToGo(sig, args[0])
+			require.Equal(b, ed25519.SignatureSize, n)
+			return nil
+		}))
+	}
+	require.True(b, ed25519.Verify2(pub, message, sig))
+}
+
+func Benchmark_Verify2(b *testing.B) {
+	pub, priv, err := ed25519.GenerateKey(nil)
+	require.NoError(b, err)
+	pubBytes := js.Global().Get("Uint8Array").New(ed25519.PublicKeySize)
+	n := js.CopyBytesToJS(pubBytes, pub)
+	require.Equal(b, ed25519.PublicKeySize, n)
+
+	message := []byte("hello world")
+	msgBytes := js.Global().Get("Uint8Array").New(len(message))
+	n = js.CopyBytesToJS(msgBytes, message)
+	require.Equal(b, len(message), n)
+
+	sig := ed25519.Sign2(priv, message)
+	sigBytes := js.Global().Get("Uint8Array").New(ed25519.SignatureSize)
+	n = js.CopyBytesToJS(sigBytes, sig)
+	require.Equal(b, ed25519.SignatureSize, n)
+
+	for i := 0; i < b.N; i++ {
+		Verify2Callback.Invoke(pubBytes, msgBytes, sigBytes, js.FuncOf(func(this js.Value, args []js.Value) any {
+			require.True(b, args[0].Bool())
+			return nil
+		}))
+	}
+}
