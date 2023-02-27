@@ -24,31 +24,25 @@ jobs:
 
       - name: Install chrome
         uses: browser-actions/setup-chrome@v1
-      - name: Install wasmbrowsertest
-        run: go install github.com/agnivade/wasmbrowsertest@v0.7.0
-      - name: Setup wasmexec
-        run: mv $(go env GOPATH)/bin/wasmbrowsertest $(go env GOPATH)/bin/go_js_wasm_exec
+      - name: Install dependencies
+        run: make install
 
       - name: Setup PATH for wasm
         run: echo "${{env.GOROOT}}/misc/wasm" >> $GITHUB_PATH
 
-      - name: build
-        env:
-          GOOS: js
-          GOARCH: wasm
-        run: go build -v -o ./ed25519.wasm ./wasm/...
-      - name: go test
-        env:
-          GOOS: js
-          GOARCH: wasm
-        run: go test -v ./wasm/...
+      - name: build wasm
+        run: make build-wasm
+      - name: test go
+        run: make test-go
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.node-version }}
-          cache: 'yarn'
+          cache: "yarn"
 
-      - name: build and test js library
-        run: make ci
+      - name: build js
+        run: make build-js
 
+      - name: test js
+        run: make test-js
