@@ -18,7 +18,7 @@ test-all: test-go test-js
 .PHONY: test-all
 
 test-go:
-	go test -v ./wasm/...
+	GOOS=js GOARCH=wasm go test -v ./wasm/...
 .PHONY: test-go
 
 test-js:

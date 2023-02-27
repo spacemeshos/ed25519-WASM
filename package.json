@@ -15,7 +15,7 @@
     "url": "git+https://github.com/spacemeshos/ed25519-WASM.git"
   },
   "author": "Spacemesh",
-  "license": "MIT",
+  "license": "Apache",
   "bugs": {
     "url": "https://github.com/spacemeshos/ed25519-WASM/issues"
   },
