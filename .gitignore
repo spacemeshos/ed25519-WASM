@@ -1,6 +1,7 @@
 vendor/*
 .idea/*
 node_modules/
+benchmarks/
 yarn-error.log
 build/
 lib/

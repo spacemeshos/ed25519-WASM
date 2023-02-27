@@ -1,32 +1,37 @@
 import { benchmarkSuite } from "jest-bench";
+import Ed25519 from '../src/index';
 
-let a: Number[];
+const seed = Uint8Array.from([
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+]);
 
-benchmarkSuite("sample", {
-    // setup will not run just once, it will run for each loop
-    setup() {
-        a = [...Array(10e6).keys()];
+const message = Buffer.from('Hello world!');
+
+let pub: Uint8Array;
+let sec: Uint8Array;
+let signature: Uint8Array;
+
+benchmarkSuite("Ed25519", {
+    async setupSuite() {
+        const k = await Ed25519.generateKeyPair(seed);
+        expect(k.publicKey).toHaveLength(32);
+        expect(k.secretKey).toHaveLength(64);
+
+        pub = k.publicKey;
+        sec = k.secretKey;
+
+        signature = await Ed25519.sign(sec, message);
+        expect(signature).toHaveLength(64);
     },
 
-    // same thing with teardown
-    teardown() {
-        if (a.length < 10e6) a.unshift(0);
+    ["sign"]: async () => {
+        const s = await Ed25519.sign(sec, message);
+        expect(s).toEqual(signature);
     },
 
-    ["Array.indexOf"]: () => {
-        a.indexOf(555599);
-    },
-
-    ["delete Array[i]"]: () => {
-        expect(a.length).toEqual(10e6);
-        delete a[0];
-    },
-
-    ["Array.unshift"]: () => {
-        a.unshift(-1);
-    },
-
-    ["Array.push"]: () => {
-        a.push(1000000);
-    },
+    ["verify"]: async () => {
+        const v = await Ed25519.verify(pub, message, signature);
+        expect(v).toBeTruthy();
+    }
 });
