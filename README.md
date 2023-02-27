@@ -52,6 +52,7 @@ __verifyTransaction(publicKey Uint8Array(32), message Uint8Array, signature Uint
 - yarn
 
 Run
+
 ```bash
-make
+make build-all
 ```
