@@ -71,7 +71,7 @@ class Ed25519 {
       );
     });
   }
-  
+
   static sign(
     privateKey: Uint8Array, // 64 bytes
     message: Uint8Array,
@@ -85,7 +85,7 @@ class Ed25519 {
       );
     });
   }
-  
+
   static verify(
     publicKey: Uint8Array, // 32 bytes
     message: Uint8Array,
