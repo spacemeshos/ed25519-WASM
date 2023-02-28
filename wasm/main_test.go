@@ -4,7 +4,7 @@ import (
 	"syscall/js"
 	"testing"
 
-	"github.com/spacemeshos/ed25519"
+	"github.com/spacemeshos/ed25519-recovery"
 	"github.com/stretchr/testify/require"
 )
 
@@ -77,7 +77,7 @@ func Test_Sign2(t *testing.T) {
 		sig := make([]byte, ed25519.SignatureSize)
 		n := js.CopyBytesToGo(sig, args[0])
 		require.Equal(t, ed25519.SignatureSize, n)
-		require.True(t, ed25519.Verify2(pub, message, sig))
+		require.True(t, ed25519.Verify(pub, message, sig))
 
 		return nil
 	}))
@@ -95,7 +95,7 @@ func Test_Verify2(t *testing.T) {
 	n = js.CopyBytesToJS(msgBytes, message)
 	require.Equal(t, len(message), n)
 
-	sig := ed25519.Sign2(priv, message)
+	sig := ed25519.Sign(priv, message)
 	sigBytes := js.Global().Get("Uint8Array").New(ed25519.SignatureSize)
 	n = js.CopyBytesToJS(sigBytes, sig)
 	require.Equal(t, ed25519.SignatureSize, n)
@@ -127,7 +127,7 @@ func Benchmark_Sign2(b *testing.B) {
 			return nil
 		}))
 	}
-	require.True(b, ed25519.Verify2(pub, message, sig))
+	require.True(b, ed25519.Verify(pub, message, sig))
 }
 
 func Benchmark_Verify2(b *testing.B) {
@@ -142,7 +142,7 @@ func Benchmark_Verify2(b *testing.B) {
 	n = js.CopyBytesToJS(msgBytes, message)
 	require.Equal(b, len(message), n)
 
-	sig := ed25519.Sign2(priv, message)
+	sig := ed25519.Sign(priv, message)
 	sigBytes := js.Global().Get("Uint8Array").New(ed25519.SignatureSize)
 	n = js.CopyBytesToJS(sigBytes, sig)
 	require.Equal(b, ed25519.SignatureSize, n)

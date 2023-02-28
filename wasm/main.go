@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"syscall/js"
 
-	"github.com/spacemeshos/ed25519"
+	"github.com/spacemeshos/ed25519-recovery"
 )
 
 var c chan bool
@@ -111,7 +111,7 @@ var Sign2Callback = js.FuncOf(func(this js.Value, args []js.Value) any {
 		return nil
 	}
 	
-	signature := ed25519.Sign2(sk, message)
+	signature := ed25519.Sign(sk, message)
 	sigBytes := js.Global().Get("Uint8Array").New(ed25519.SignatureSize)
 	n = js.CopyBytesToJS(sigBytes, signature)
 	if n != ed25519.SignatureSize {
@@ -150,7 +150,7 @@ var Verify2Callback = js.FuncOf(func(this js.Value, args []js.Value) any {
 		return nil
 	}
 
-	isValid := ed25519.Verify2(pk, message, signature)
+	isValid := ed25519.Verify(pk, message, signature)
 	callback.Invoke(isValid)
 	return nil
 })
