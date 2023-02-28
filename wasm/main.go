@@ -90,14 +90,14 @@ var DerivePrivateKeyCallback = js.FuncOf(func(this js.Value, args []js.Value) an
 	return nil
 })
 
-// Sign2Callback is a callback function that signs a message with a private key using a modified version of ed25519 signature scheme to allow key extraction.
+// SignCallback is a callback function that signs a message with a private key using a modified version of ed25519 signature scheme to allow key extraction.
 // Parameters:
 //   1. privateKey - a Uint8Array of 64 bytes
 //   2. message - a Uint8Array
 //   3. callback - a function that will be called with the generated signature
-var Sign2Callback = js.FuncOf(func(this js.Value, args []js.Value) any {
+var SignCallback = js.FuncOf(func(this js.Value, args []js.Value) any {
 	callback := args[2]
-	
+
 	sk := make([]byte, ed25519.PrivateKeySize)
 	n := js.CopyBytesToGo(sk, args[0])
 	if n != ed25519.PrivateKeySize {
@@ -110,7 +110,7 @@ var Sign2Callback = js.FuncOf(func(this js.Value, args []js.Value) any {
 		callback.Invoke(js.Null(), js.Null())
 		return nil
 	}
-	
+
 	signature := ed25519.Sign(sk, message)
 	sigBytes := js.Global().Get("Uint8Array").New(ed25519.SignatureSize)
 	n = js.CopyBytesToJS(sigBytes, signature)
@@ -122,13 +122,13 @@ var Sign2Callback = js.FuncOf(func(this js.Value, args []js.Value) any {
 	return nil
 })
 
-// Verify2Callback is a callback function that verifies a signature with a public key using a modified version of ed25519 signature scheme to allow key extraction.
+// VerifyCallback is a callback function that verifies a signature with a public key using a modified version of ed25519 signature scheme to allow key extraction.
 // Parameters:
 //   1. publicKey - a Uint8Array of 32 bytes
 //   2. message - a Uint8Array
 //   3. signature - a Uint8Array of 64 bytes
 //   4. callback - a function that will be called with the generated signature
-var Verify2Callback = js.FuncOf(func(this js.Value, args []js.Value) any {
+var VerifyCallback = js.FuncOf(func(this js.Value, args []js.Value) any {
 	callback := args[3]
 
 	pk := make([]byte, ed25519.PublicKeySize)
@@ -163,8 +163,8 @@ var ShutdownCallback = js.FuncOf(func(this js.Value, args []js.Value) any {
 func RegisterCallbacks() {
 	js.Global().Set("__generateKeyPair", GenerateKeyCallback)
 	js.Global().Set("__deriveNewKeyPair", DerivePrivateKeyCallback)
-	js.Global().Set("__signTransaction", Sign2Callback)
-	js.Global().Set("__verifyTransaction", Verify2Callback)
+	js.Global().Set("__signTransaction", SignCallback)
+	js.Global().Set("__verifyTransaction", VerifyCallback)
 	js.Global().Set("__stopAndCleanUp", ShutdownCallback)
 }
 
@@ -184,7 +184,7 @@ func main() {
 	CleanUp()
 	GenerateKeyCallback.Release()
 	DerivePrivateKeyCallback.Release()
-	Sign2Callback.Release()
-	Verify2Callback.Release()
+	SignCallback.Release()
+	VerifyCallback.Release()
 	ShutdownCallback.Release()
 }

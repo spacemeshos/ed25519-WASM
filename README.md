@@ -1,10 +1,7 @@
 # ed25519-WASM
 
-A wasm implementation of the Spacemesh extensions ([github](https://github.com/spacemeshos/ed25519)) for `crypto/ed25519` ([pkg.go.dev](https://pkg.go.dev/crypto/ed25519).
-
-## Motivation
-
-In order to verify the validity of a given signature, the validator should posses the public key of the signer. It can be sent along with the message and its signature, which means that the overall data being sent includes 256 bits of the public key. Our function allows to extract the public key from the signature (and the message), thus the public key may not be sent, resulting in a smaller transferred data. Note: there's a computational cost for extracting the public key, so one should consider the trade-off between computations and data size.
+A WASM implementation of the modified ed25519 signature algorithm with key extraction
+([github](https://github.com/spacemeshos/ed25519-recovery)).
 
 ## Usage
 
@@ -12,11 +9,11 @@ In order to verify the validity of a given signature, the validator should posse
 npm install "github.com/spacemeshos/ed25519-wasm"
 ```
 
-Internal usage of package `ed25519` from `github.com/spacemeshos/ed25519` instead of `crypto/ed25519`.
+Internally this package uses `github.com/spacemeshos/ed25519-recovery`.
 
 ## __generateKeyPair
 
-__generateKeyPair is JS exposure of golang func GenerateKey which returns privateKey and publicKey using provided seed.
+`__generateKeyPair` is the JS exported Go function `GenerateKey` which returns a privateKey and publicKey using provided seed.
 
 ```bash
 __generateKeyPair(seed Uint8Array(32), callbackToStoreValues Function) publicKey Uint8Array(32), privateKey Uint8Array(64)
@@ -24,23 +21,19 @@ __generateKeyPair(seed Uint8Array(32), callbackToStoreValues Function) publicKey
 
 ## __signTransaction
 
-__signTransaction is JS exposure of golang func Sign2 signs the message with privateKey and returns a signature.
-The signature may be verified using Verify2(), if the signer's public key is known.
-The signature returned by this method can be used together with the message
-to extract the public key using ExtractPublicKey()
-It will return null if privateKey.length is not PrivateKeySize.
+`__signTransaction` is the JS exported Go function `Sign` to sign a message with privateKey and return a signature.
+The signature may be verified using `__verifyTransaction`, if the signer's public key is known.
 
 ```bash
-__generateKeyPair
 __signTransaction(privateKey Uint8Array(64), message Uint8Array, callbackToStoreValues Function) Uint8Array(64)
 ```
 
 ## __verifyTransaction
 
-__verifyTransaction is JS exposure of Verify2 verifies a signature created with Sign2(), assuming the verifier possesses the public key.
+`__verifyTransaction` is the JS exported Go function `Verify` to verify a signature created with `__signTransaction`,
+assuming the verifier possesses the public key.
 
 ```bash
-func Verify2(publicKey PublicKey, message, sig []byte) bool
 __verifyTransaction(publicKey Uint8Array(32), message Uint8Array, signature Uint8Array(64), callbackToStoreValue Function) boolean
 ```
 
