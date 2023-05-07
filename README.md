@@ -1,3 +1,5 @@
+# This library has been deprecated and is no longer used nor maintained. Please use a standard ed25519 library instead.
+
 # ed25519-WASM
 
 A WASM implementation of the modified ed25519 signature algorithm with key extraction
